@@ -229,6 +229,7 @@ macro_rules! impl_secret_key {
                             },
                             _ => unreachable!("inconsistent key state"),
                         },
+                        _ => unimplemented!("remote keys not supported yet"),
                     }?;
 
                     // strip leading zeros, to match parse results from MPIs

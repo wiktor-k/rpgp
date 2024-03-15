@@ -10,6 +10,11 @@ use crate::crypto::sym::SymmetricKeyAlgorithm;
 
 use super::Mpi;
 
+pub trait RemoteKey: std::fmt::Debug + Zeroize {
+    fn rsa_decrypt(&self, data: &[u8]) -> crate::errors::Result<Vec<u8>>;
+    fn ecdh_derive(&self, public: &[u8]) -> crate::errors::Result<Vec<u8>>;
+}
+
 /// The version of the secret key that is actually exposed to users to do crypto operations.
 #[allow(clippy::large_enum_variant)] // FIXME
 #[derive(Debug, ZeroizeOnDrop)]
@@ -19,6 +24,7 @@ pub enum SecretKeyRepr {
     ECDSA(ECDSASecretKey),
     ECDH(ECDHSecretKey),
     EdDSA(EdDSASecretKey),
+    Remote(Box<dyn RemoteKey>),
 }
 
 /// Secret key for ECDH with Curve25519, the only combination we currently support.

@@ -1,3 +1,4 @@
+use crate::crypto::public_key::PublicKeyAlgorithm;
 use crate::crypto::sym::SymmetricKeyAlgorithm;
 use crate::crypto::{checksum, ecdh, rsa};
 use crate::errors::Result;
@@ -28,6 +29,16 @@ where
                 ecdh::decrypt(priv_key, mpis, &locked_key.fingerprint())?
             }
             SecretKeyRepr::EdDSA(_) => unimplemented_err!("EdDSA"),
+            SecretKeyRepr::Remote(ref remote) => match locked_key.algorithm() {
+                PublicKeyAlgorithm::RSAEncrypt | PublicKeyAlgorithm::RSA => {
+                    remote.rsa_decrypt(mpis[0].as_bytes())?
+                }
+                // it'd be better here if we could pass "remote" to ecdh::decrypt
+                // so that rpgp did the pgp specific parts and "ecdh_derive" would
+                // just do the part of "out_secret.diffie_hellman"
+                PublicKeyAlgorithm::ECDH => remote.ecdh_derive(mpis[0].as_bytes())?,
+                _ => unimplemented_err!("Remote"),
+            },
         };
 
         let session_key_algorithm = SymmetricKeyAlgorithm::from(decrypted_key[0]);
