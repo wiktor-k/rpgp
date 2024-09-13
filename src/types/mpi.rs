@@ -73,10 +73,6 @@ impl Mpi {
         Mpi(v)
     }
 
-    pub fn from_slice(slice: &[u8]) -> Self {
-        Mpi(slice.to_vec())
-    }
-
     /// Strips leading zeros.
     pub fn from_raw_slice(raw: &[u8]) -> Self {
         Mpi(strip_leading_zeros(raw).to_vec())
@@ -157,7 +153,7 @@ impl<'a> Serialize for MpiRef<'a> {
 
 impl From<&[u8]> for Mpi {
     fn from(other: &[u8]) -> Mpi {
-        Mpi::from_slice(other)
+        Mpi::from_raw_slice(other)
     }
 }
 
